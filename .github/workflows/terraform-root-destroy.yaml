@@ -43,10 +43,6 @@ jobs:
         run: echo 'Not running against 'main' branch or the action has not been confirmed, exiting.' && exit 1
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
       - name: Read Terraform Version
         run: echo "TF_VERSION=$(cat .terraform-version)" >> $GITHUB_ENV
       - name: Configure AWS Credentials
