@@ -33,6 +33,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Read Terraform Version
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
         run: echo "TF_VERSION=$(cat .terraform-version)" >> $GITHUB_ENV
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
