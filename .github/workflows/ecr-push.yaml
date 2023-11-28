@@ -52,7 +52,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.aws-ecr-repository-arn }}
+        images: ${{ secrets.aws-ecr-repository-uri }}
         tags: |
           type=schedule,pattern=latest
           type=sha
