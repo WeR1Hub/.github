@@ -15,8 +15,8 @@ on:
       aws-assume-role-region:
         description: 'The AWS region to assume IAM in for AWS operations.'
         required: true
-      aws-ecr-repository-arn:
-        description: 'The AWS ECR repository ARN.'
+      aws-ecr-repository-uri:
+        description: 'The AWS ECR repository URI.'
         required: true
 
 jobs:
