@@ -18,6 +18,9 @@ on:
       aws-ecr-repository-uri:
         description: 'The AWS ECR repository URI.'
         required: true
+      dockerfile-path:
+        description: 'The Dockerfile path.'
+        required: true
 
 jobs:
   deploy:
@@ -65,3 +68,4 @@ jobs:
         platforms: linux/amd64,linux/arm64
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        file: ${{ dockerfile-path }}
