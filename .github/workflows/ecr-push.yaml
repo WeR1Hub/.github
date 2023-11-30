@@ -48,8 +48,8 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: ${{ secrets.aws-assume-role-arn }}
-        aws-region: ${{ secrets.aws-assume-role-region }}
+        role-to-assume: ${{ inputs.aws-assume-role-arn }}
+        aws-region: ${{ inputs.aws-assume-role-region }}
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -59,7 +59,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.aws-ecr-repository-uri }}
+        images: ${{ inputs.aws-ecr-repository-uri }}
         tags: |
           type=schedule,pattern=latest
           type=sha
@@ -72,4 +72,4 @@ jobs:
         platforms: linux/amd64,linux/arm64
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        file: ${{ dockerfile-path }}
+        file: ${{ inputs.dockerfile-path }}
