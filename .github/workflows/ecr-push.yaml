@@ -8,19 +8,23 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-    secrets:
       aws-assume-role-arn:
         description: 'The AWS Role ARN to assume for AWS operations.'
         required: true
+        type: string
       aws-assume-role-region:
         description: 'The AWS region to assume IAM in for AWS operations.'
         required: true
+        type: string
       aws-ecr-repository-uri:
         description: 'The AWS ECR repository URI.'
         required: true
+        type: string
       dockerfile-path:
         description: 'The Dockerfile path.'
-        required: true
+        required: false
+        default: 'Dockerfile'
+        type: string
 
 jobs:
   deploy:
