@@ -48,8 +48,15 @@ jobs:
 
       - name: Create tag
         id: tag
+        needs: [semver]
         run: |
           git config user.name github-actions
           git config user.email git@wer1.ai
           git tag ${{ steps.semver.outputs.version }} -m "Tag from: ${{ github.sha }}"
           git push --tags
+
+      - name: Pass Tag
+        id: pass
+        needs: [tag]
+        outputs:
+          tag: ${{ steps.tag.semver.outputs.version }}
