@@ -1,7 +1,6 @@
 name: Semantic Version
 on:
   workflow_call:
-    branches: [main, prodaction]
     outputs:
       tag:
         description: 'Tag'
