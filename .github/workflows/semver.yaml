@@ -49,7 +49,7 @@ jobs:
           # If enabled, diagnostic information will be added to the action output.
           debug: false
           # If true, the branch will be used to select the maximum version.
-          version_from_branch: true
+          version_from_branch: false
 
       - name: Create tag
         id: tag
