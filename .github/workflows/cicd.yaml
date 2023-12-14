@@ -1,4 +1,4 @@
-name: AWS ECR Push
+name: CICD
 
 on:
   workflow_call:
