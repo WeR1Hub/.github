@@ -25,6 +25,10 @@ on:
         required: false
         default: 'Dockerfile'
         type: string
+      tag:
+        description: 'Semver Tag'
+        required: true
+        type: string
 
 jobs:
   deploy:
@@ -52,16 +56,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ inputs.aws-ecr-repository-uri }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v5
+      #   with:
+      #     images: ${{ inputs.aws-ecr-repository-uri }}
+      #     tags: |
+      #       type=ref,event=branch
+      #       type=ref,event=pr
+      #       type=semver,pattern={{version}}
+      #       type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -70,6 +74,6 @@ jobs:
           push: true
           platforms: linux/amd64
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ inputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ${{ inputs.dockerfile-path }}
