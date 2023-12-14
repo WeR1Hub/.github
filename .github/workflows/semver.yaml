@@ -53,10 +53,5 @@ jobs:
           git config user.email git@wer1.ai
           git tag ${{ steps.semver.outputs.version }} -m "Tag from: ${{ github.sha }}"
           git push --tags
-
-      # - name: Pass Tag
-      #   id: pass
-      #   needs: [tag]
-      #   run: echo "World"
-      #   outputs:
-      #     tag: ${{ steps.tag.semver.outputs.version }}
+        outputs:
+          tag: ${{ steps.tag.semver.outputs.version }}
