@@ -58,5 +58,6 @@ jobs:
       - name: Pass Tag
         id: pass
         needs: [tag]
+        run: echo "World"
         outputs:
           tag: ${{ steps.tag.semver.outputs.version }}
