@@ -1,7 +1,7 @@
 name: Semantic Version
 on:
   workflow_call:
-    #branches: [main]
+    branches: [main]
     outputs:
       tag:
         description: 'Tag'
@@ -50,7 +50,7 @@ jobs:
           # If enabled, diagnostic information will be added to the action output.
           debug: false
           # If true, the branch will be used to select the maximum version.
-          version_from_branch: false
+          version_from_branch: true
 
       - name: Create tag
         id: tag
