@@ -62,7 +62,7 @@ jobs:
         with:
           images: ${{ inputs.aws-ecr-repository-uri }}
           tags: |
-            type=raw,value=${{inputs.tag}}
+            type=raw,value=${{ inputs.tag }}
             type=raw,value=latest
 
       - name: Build and push Docker image
