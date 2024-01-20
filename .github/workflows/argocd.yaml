@@ -36,6 +36,6 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "support@wer1.ai"
-          git add argocd/dev/apps/graph-private/graph-private.yaml
+          git add dev/apps/graph-private/graph-private.yaml
           git commit -m "Update image version to ${{ inputs.tag }}"
           git push
