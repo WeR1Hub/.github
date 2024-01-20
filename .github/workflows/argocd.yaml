@@ -10,8 +10,9 @@ on:
         type: string
       tag:
         description: 'Semver Tag'
-        required: false
+        required: true
         type: string
+
     secrets:
       ARGOCD_PAT:
         required: true
