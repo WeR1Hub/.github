@@ -75,3 +75,21 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ${{ inputs.dockerfile-path }}
+
+      - name: Checkout image version in argocd
+        uses: actions/checkout@master
+        with:
+          repository: wer1hub/argocd
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image version
+        run: |
+          sed -i "s|976284867583.dkr.ecr.eu-west-1.amazonaws.com/graph:.*|976284867583.dkr.ecr.eu-west-1.amazonaws.com/graph:${{ inputs.tag }}|" argocd/dev/apps/graph-private/graph-private.yaml
+
+      - name: Commit updated image version
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "support@wer1.ai"
+          git add argocd/dev/apps/graph-private/graph-private.yaml
+          git commit -m "Update image version to ${{ inputs.tag }}"
+          git push
