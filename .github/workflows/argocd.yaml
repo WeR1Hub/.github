@@ -12,10 +12,13 @@ on:
         description: 'Semver Tag'
         required: false
         type: string
+    secrets:
+      ARGOCD_PAT:
+        required: true
 
 jobs:
   deploy:
-    name: 'Update Image Version in ARGOCD'
+    name: 'ArgoCD'
     runs-on: ${{ inputs.runs-on }}
 
     steps:
