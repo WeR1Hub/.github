@@ -30,7 +30,7 @@ jobs:
 
       - name: Update image version
         run: |
-          sed -i "s|976284867583.dkr.ecr.eu-west-1.amazonaws.com/graph:.*|976284867583.dkr.ecr.eu-west-1.amazonaws.com/graph:${{ inputs.tag }}|" argocd/dev/apps/graph-private/graph-private.yaml
+          sed -i "s|976284867583.dkr.ecr.eu-west-1.amazonaws.com/graph:.*|976284867583.dkr.ecr.eu-west-1.amazonaws.com/graph:${{ inputs.tag }}|" dev/apps/graph-private/graph-private.yaml
 
       - name: Commit updated image version
         run: |
