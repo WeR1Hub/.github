@@ -50,5 +50,5 @@ jobs:
           git add ${{ inputs.env }}/apps/graph/graph-private.yaml
           git add ${{ inputs.env }}/apps/graph/graph-public.yaml
           git add ${{ inputs.env }}/apps/graph/graph-dbmigrate-job.yaml
-          git commit -m "Update image version to ${{ inputs.tag }}"
+          git commit -m "#autocommit: Update image version to ${{ inputs.tag }}"
           git push
