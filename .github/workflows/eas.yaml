@@ -26,6 +26,8 @@ jobs:
   build:
     name: Install and Build
     runs-on: ${{ inputs.runs-on }}
+    env:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
     steps:
       - name: Check environment and set profile variable
         run: |
@@ -81,8 +83,7 @@ jobs:
 
       - name: Build Project with EAS
         run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform ios --no-wait --non-interactive #--auto-submit
-        with:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+
 
       # - name: Submit to Stores (Optional)
       #   run: eas submit --platform all --non-interactive
