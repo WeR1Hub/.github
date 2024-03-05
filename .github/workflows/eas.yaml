@@ -47,6 +47,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         id: pnpm-install
@@ -81,9 +82,22 @@ jobs:
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v2
 
-      - name: Build Project with EAS
-        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform ios --no-wait --non-interactive #--auto-submit
+      - name: Configure Build Version
+        run: |
+          VERSION=$(echo ${{ inputs.tag }}
+          sed -i -e "s/version:.*/version: '$VERSION',/" ./app.config.ts
+          sed -i -E "s/(.*versionCode:.*)([0-9]*[0-9])/&@/g;:a {s/0@/1/g;s/1@/2/g;s/2@/3/g;s/3@/4/g;s/4@/5/g;s/5@/6/g;s/6@/7/g;s/7@/8/g;s/8@/9/g;s/9@/@0/g;t a}" ./app.config.ts
 
+      - name: Build Project with EAS
+        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive #--auto-submit
+
+      - name: Commit updated image version
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "support@wer1.ai"
+          git add ./app.config.ts
+          git commit -m "#autocommit: Update image version to ${{ inputs.tag }}"
+          git push
 
       # - name: Submit to Stores (Optional)
       #   run: eas submit --platform all --non-interactive
