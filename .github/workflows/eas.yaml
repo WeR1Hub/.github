@@ -19,6 +19,8 @@ on:
     secrets:
       EXPO_TOKEN:
         required: true
+      DOPPLER_TOKEN:
+        required: true
 
 jobs:
   build:
@@ -33,7 +35,7 @@ jobs:
             echo "PROFILE=production" >> $GITHUB_ENV
           fi
 
-      - name: Use PROFILE variable
+      - name: Test PROFILE / Tag variables
         run: |
           echo "Profile is set to $PROFILE"
           echo "Tag is set to ${{ inputs.tag }}"
@@ -78,8 +80,9 @@ jobs:
         uses: dopplerhq/cli-action@v2
 
       - name: Build Project with EAS
-        run: doppler run -c ${{ ENV }} -- eas build --profile $PROFILE --platform ios --no-wait --non-interactive #--auto-submit
-
+        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform ios --no-wait --non-interactive #--auto-submit
+        with:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
       # - name: Submit to Stores (Optional)
       #   run: eas submit --platform all --non-interactive
