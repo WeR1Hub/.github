@@ -43,6 +43,9 @@ jobs:
           echo "Tag is set to ${{ inputs.tag }}"
 
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -94,6 +97,7 @@ jobs:
 
       - name: Commit updated image version
         run: |
+          # git switch -
           git config --global user.name "GitHub Actions"
           git config --global user.email "support@wer1.ai"
           git add ./app.config.ts
