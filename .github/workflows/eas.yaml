@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Check environment and set profile variable
         run: |
-          if [ "${{ env }}" = "dev" ]; then
+          if [ "${{ inputs.env }}" = "dev" ]; then
             echo "PROFILE=staging" >> $GITHUB_ENV
           else
             echo "PROFILE=production" >> $GITHUB_ENV
@@ -38,19 +38,45 @@ jobs:
           echo "Profile is set to $PROFILE"
           echo "Tag is set to ${{ inputs.tag }}"
 
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install Dependencies
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: pnpm
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
         run: |
-          npm install
-          npm install -g eas-cli
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm install -g eas-cli
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v2
-
-      - name: Login to Expo
-        run: eas login --non-interactive --apiKey ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Project with EAS
         run: doppler run -c ${{ ENV }} -- eas build --profile $PROFILE --platform ios --no-wait --non-interactive #--auto-submit
