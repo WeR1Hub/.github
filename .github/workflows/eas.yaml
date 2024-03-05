@@ -1,0 +1,61 @@
+name: Build and Release Expo App
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: 'Agent selection string.'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      env:
+        description: 'Environment'
+        required: true
+        type: string
+      tag:
+        description: 'Tag'
+        required: true
+        type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
+
+jobs:
+  build:
+    name: Install and Build
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - name: Check environment and set profile variable
+        run: |
+          if [ "${{ env }}" = "dev" ]; then
+            echo "PROFILE=staging" >> $GITHUB_ENV
+          else
+            echo "PROFILE=production" >> $GITHUB_ENV
+          fi
+
+      - name: Use PROFILE variable
+        run: |
+          echo "Profile is set to $PROFILE"
+          echo "Tag is set to ${{ inputs.tag }}"
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install -g eas-cli
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v2
+
+      - name: Login to Expo
+        run: eas login --non-interactive --apiKey ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Project with EAS
+        run: doppler run -c ${{ ENV }} -- eas build --profile $PROFILE --platform ios --no-wait --non-interactive #--auto-submit
+
+
+      # - name: Submit to Stores (Optional)
+      #   run: eas submit --platform all --non-interactive
+      # if: github.ref == 'refs/heads/main'
