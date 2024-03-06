@@ -102,6 +102,11 @@ jobs:
           doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
           doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
+      - name: Google JSON
+        env:
+          GOOGLE_PLAY_SA_JSON: ${{ secrets.GOOGLE_PLAY_SA_JSON }}
+        run: echo $GOOGLE_PLAY_SA_JSON | base64 -di > ./southern-coda-411410-0c65b9cc39a1.json
+
       - name: Build Project with EAS
         run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive --auto-submit
 
