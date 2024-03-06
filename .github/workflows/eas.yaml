@@ -97,28 +97,32 @@ jobs:
           # sed -i -e "s/version:.*/version: '$VERSION',/" ./app.config.ts
           # sed -i -E "s/(.*versionCode:.*)([0-9]*[0-9])/&@/g;:a {s/0@/1/g;s/1@/2/g;s/2@/3/g;s/3@/4/g;s/4@/5/g;s/5@/6/g;s/6@/7/g;s/7@/8/g;s/8@/9/g;s/9@/@0/g;t a}" ./app.config.ts
 
-      - name: Update Doppler Config
+      - name: Configure VERSION udpates
         run: |
-          echo "RUNTIME_VERSION=$(doppler secrets -c dev get RUNTIME_VERSION --plain -p customer-app)" >> $GITHUB_ENV
-          echo "ANDROID_VERSION=$(doppler secrets -c dev get ANDROID_VERSION --plain -p customer-app)" >> $GITHUB_ENV
-          echo "ANDROID_VERSION_SUM=$(echo \"${ANDROID_VERSION}+1\" |bc)" >> $GITHUB_ENV
-
-          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
-          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$ANDROID_VERSION_SUM --no-interactive -p customer-app
+          PREVIOUS_RUNTIME_VERSION=$(doppler secrets -c ${{ inputs.env }} get RUNTIME_VERSION --plain -p customer-app)
+          echo "PREVIOUS_RUNTIME_VERSION=$PREVIOUS_RUNTIME_VERSION" >> $GITHUB_ENV
+          PREVIOUS_ANDROID_VERSION=$(doppler secrets -c ${{ inputs.env }} get ANDROID_VERSION --plain -p customer-app)
+          echo "PREVIOUS_ANDROID_VERSION=$PREVIOUS_ANDROID_VERSION" >> $GITHUB_ENV
+          NEW_ANDROID_VERSION=$(echo "$PREVIOUS_ANDROID_VERSION+1" | bc)
+          echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
       - name: Update EAS Secrets
         run: |
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $ANDROID_VERSION_SUM --scope project --non-interactive --type=string --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
 
       - name: Build Project with EAS
         run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform android --no-wait --non-interactive #--auto-submit
+
+      - name: Update Doppler Secrets
+          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: 'Build Changelog'
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v4.2.0
         with:
-          fromTag: ${RUNTIME_VERSION}
+          fromTag: $PREVIOUS_RUNTIME_VERSION
           toTag: ${{ inputs.tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
