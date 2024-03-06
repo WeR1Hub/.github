@@ -1,4 +1,4 @@
-name: Build and Release Expo App
+name: EAS Build
 
 on:
   workflow_call:
@@ -24,7 +24,7 @@ on:
 
 jobs:
   build:
-    name: Install and Build
+    name: EAS Build
     runs-on: ${{ inputs.runs-on }}
     env:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}

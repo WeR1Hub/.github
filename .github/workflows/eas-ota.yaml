@@ -1,4 +1,4 @@
-name: Do OTA release
+name: OTA
 
 on:
   workflow_call:
@@ -24,7 +24,7 @@ on:
 
 jobs:
   build:
-    name: Install and Build
+    name: EAS OTA
     runs-on: ${{ inputs.runs-on }}
     env:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
@@ -70,11 +70,13 @@ jobs:
         run: |
           pnpm install
           pnpm install -g eas-cli
+          pnpm install -g dotenv-cli
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
+          expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
           packager: pnpm
 
@@ -86,7 +88,7 @@ jobs:
       #     PREVIOUS_RUNTIME_VERSION=$(doppler secrets -c ${{ inputs.env }} get RUNTIME_VERSION --plain -p customer-app)
       #     echo "PREVIOUS_RUNTIME_VERSION=$PREVIOUS_RUNTIME_VERSION" >> $GITHUB_ENV
 
-      - name: Update OTA
+      - name: OTA
         run: |
           doppler -c ${{ inputs.env }} secrets download --no-file --format docker > .env
           dotenv -e .env -- eas update --channel $PROFILE --clear-cache
