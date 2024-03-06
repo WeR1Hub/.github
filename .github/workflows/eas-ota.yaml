@@ -76,7 +76,6 @@ jobs:
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
-          expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
           packager: pnpm
 
@@ -91,4 +90,4 @@ jobs:
       - name: OTA
         run: |
           doppler -c ${{ inputs.env }} secrets download --no-file --format docker > .env
-          pnpm exec dotenv -e .env -- eas update --channel $PROFILE --clear-cache
+          pnpm exec dotenv -e .env -- eas update --channel $PROFILE --clear-cache --non-interactive --auto
