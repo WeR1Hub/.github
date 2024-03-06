@@ -123,7 +123,7 @@ jobs:
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v4.2.0
         with:
-          fromTag: $PREVIOUS_RUNTIME_VERSION
+          fromTag: ${{ env.PREVIOUS_RUNTIME_VERSION }}
           toTag: ${{ inputs.tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
