@@ -103,14 +103,14 @@ jobs:
           doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: Build Project with EAS
-        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform android --no-wait --non-interactive #--auto-submit
+        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive #--auto-submit
 
       - name: 'Build Changelog'
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v4.2.0
         with:
-          fromTag: ${{ env.PREVIOUS_RUNTIME_VERSION }}
-          toTag: ${{ inputs.tag }}
+          fromTag: ${{ env.PREVIOUS_RUNTIME_VERSION }}-dev
+          toTag: ${{ inputs.tag }}-dev
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Submit to Stores (Optional)
