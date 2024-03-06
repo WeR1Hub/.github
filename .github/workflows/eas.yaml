@@ -104,7 +104,7 @@ jobs:
           doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: Build Project with EAS
-        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive #--auto-submit
+        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive --auto-submit
 
       - name: 'Build Changelog'
         id: github_release
