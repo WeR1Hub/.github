@@ -86,18 +86,7 @@ jobs:
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v2
 
-      - name: Configure Build Version
-        run: |
-          # git checkout main
-          # echo "VERSION=${{ inputs.tag }}" >> $GITHUB_ENV
-
-          # ANDROID_VERSION=$(grep 'versionCode' app.config.ts |tr -d ' ' |cut -f2 -d':' |cut -f1 -d',')
-          # ANDROID_VERSION_SUM=$(echo "$ANDROID_VERSION+1" |bc)
-          # echo "ANDROID_VERSION_SUM=$ANDROID_VERSION_SUM" >> $GITHUB_ENV
-          # sed -i -e "s/version:.*/version: '$VERSION',/" ./app.config.ts
-          # sed -i -E "s/(.*versionCode:.*)([0-9]*[0-9])/&@/g;:a {s/0@/1/g;s/1@/2/g;s/2@/3/g;s/3@/4/g;s/4@/5/g;s/5@/6/g;s/6@/7/g;s/7@/8/g;s/8@/9/g;s/9@/@0/g;t a}" ./app.config.ts
-
-      - name: Configure VERSION udpates
+      - name: Configure VERSION updates
         run: |
           PREVIOUS_RUNTIME_VERSION=$(doppler secrets -c ${{ inputs.env }} get RUNTIME_VERSION --plain -p customer-app)
           echo "PREVIOUS_RUNTIME_VERSION=$PREVIOUS_RUNTIME_VERSION" >> $GITHUB_ENV
@@ -110,14 +99,11 @@ jobs:
         run: |
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
           doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
+          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: Build Project with EAS
         run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform android --no-wait --non-interactive #--auto-submit
-
-      - name: Update Doppler Secrets
-        run: |
-          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
-          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: 'Build Changelog'
         id: build_changelog
@@ -126,14 +112,6 @@ jobs:
           fromTag: ${{ env.PREVIOUS_RUNTIME_VERSION }}
           toTag: ${{ inputs.tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Commit updated image version
-      #   run: |
-      #     git config --global user.name "GitHub Actions"
-      #     git config --global user.email "support@wer1.ai"
-      #     git add ./app.config.ts
-      #     git commit -m "#autocommit: Update image version to ${{ inputs.tag }}"
-      #     git push
 
       # - name: Submit to Stores (Optional)
       #   run: eas submit --platform all --non-interactive
