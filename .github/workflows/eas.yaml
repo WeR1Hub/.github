@@ -115,6 +115,7 @@ jobs:
         run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform android --no-wait --non-interactive #--auto-submit
 
       - name: Update Doppler Secrets
+        run: |
           doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
           doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
