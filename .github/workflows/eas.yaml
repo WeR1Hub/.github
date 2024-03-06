@@ -102,16 +102,28 @@ jobs:
           VERSION: $VERSION
           ANDROID_VERSION: $ANDROID_VERSION_SUM
         run: |
-          # echo "RUNTIME_VERSION=$(doppler secrets -c dev get RUNTIME_VERSION --plain -p customer-app)" >> $GITHUB_ENV
+          echo "RUNTIME_VERSION=$(doppler secrets -c dev get RUNTIME_VERSION --plain -p customer-app)" >> $GITHUB_ENV
           echo "ANDROID_VERSION=$(doppler secrets -c dev get ANDROID_VERSION --plain -p customer-app)" >> $GITHUB_ENV
           echo "ANDROID_VERSION_SUM=$(echo \"$ANDROID_VERSION+1\" |bc)" >> $GITHUB_ENV
 
-          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=$RUNTIME_VERSION --no-interactive -p customer-app
           doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$ANDROID_VERSION_SUM --no-interactive -p customer-app
+
+      - name: Update EAS Secrets
+        run: |
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $ANDROID_VERSION_SUM --scope project --non-interactive --type=string --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value $RUNTIME_VERSION --scope project --non-interactive --type=string --force
 
       - name: Build Project with EAS
         run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive #--auto-submit
 
+      - name: 'Build Changelog'
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        with:
+          fromTag: $RUNTIME_VERSION
+          toTag: ${{ inputs.tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Commit updated image version
       #   run: |
