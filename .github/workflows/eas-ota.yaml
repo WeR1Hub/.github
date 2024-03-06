@@ -1,0 +1,92 @@
+name: Do OTA release
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: 'Agent selection string.'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      env:
+        description: 'Environment'
+        required: true
+        type: string
+      tag:
+        description: 'Tag'
+        required: true
+        type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
+      DOPPLER_TOKEN:
+        required: true
+
+jobs:
+  build:
+    name: Install and Build
+    runs-on: ${{ inputs.runs-on }}
+    env:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+    steps:
+      - name: Check environment and set profile variable
+        run: |
+          if [ "${{ inputs.env }}" = "dev" ]; then
+            echo "PROFILE=staging" >> $GITHUB_ENV
+          else
+            echo "PROFILE=production" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm install -g eas-cli
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: pnpm
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v2
+
+      # - name: Configure VERSION updates
+      #   run: |
+      #     PREVIOUS_RUNTIME_VERSION=$(doppler secrets -c ${{ inputs.env }} get RUNTIME_VERSION --plain -p customer-app)
+      #     echo "PREVIOUS_RUNTIME_VERSION=$PREVIOUS_RUNTIME_VERSION" >> $GITHUB_ENV
+
+      - name: Update OTA
+        run: |
+          doppler -c ${{ inputs.env }} secrets download --no-file --format docker > .env
+          dotenv -e .env -- eas update --channel $PROFILE --clear-cache
