@@ -82,11 +82,6 @@ jobs:
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v2
 
-      # - name: Configure VERSION updates
-      #   run: |
-      #     PREVIOUS_RUNTIME_VERSION=$(doppler secrets -c ${{ inputs.env }} get RUNTIME_VERSION --plain -p customer-app)
-      #     echo "PREVIOUS_RUNTIME_VERSION=$PREVIOUS_RUNTIME_VERSION" >> $GITHUB_ENV
-
       - name: OTA
         run: |
           doppler -c ${{ inputs.env }} secrets download --no-file --format docker > .env
