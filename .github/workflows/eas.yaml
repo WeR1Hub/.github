@@ -35,6 +35,8 @@ jobs:
         run: |
           if [ "${{ inputs.env }}" = "dev" ]; then
             echo "PROFILE=staging" >> $GITHUB_ENV
+          elif [ "${{ inputs.env }}" = "dev_debug" ]; then
+            echo "PROFILE=debug" >> $GITHUB_ENV
           else
             echo "PROFILE=production" >> $GITHUB_ENV
           fi
