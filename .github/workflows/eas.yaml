@@ -114,7 +114,7 @@ jobs:
         run: echo $GOOGLE_PLAY_SA_JSON | base64 -di > ./southern-coda-411410-0c65b9cc39a1.json
 
       - name: Build Project with EAS
-        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive --auto-submit
+        run: doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive --auto-submit --clear-cache
 
       - name: 'Build Changelog'
         id: github_release
