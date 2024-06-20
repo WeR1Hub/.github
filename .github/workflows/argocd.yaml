@@ -40,6 +40,7 @@ jobs:
       - name: Update image version
         run: |
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-private.yaml
+          sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-private-admin.yaml
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-public.yaml
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-dbmigrate-job.yaml
 
@@ -48,6 +49,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "support@wer1.ai"
           git add ${{ inputs.env }}/apps/graph/graph-private.yaml
+          git add ${{ inputs.env }}/apps/graph/graph-private-admin.yaml
           git add ${{ inputs.env }}/apps/graph/graph-public.yaml
           git add ${{ inputs.env }}/apps/graph/graph-dbmigrate-job.yaml
           git commit -m "#autocommit: Update image version to ${{ inputs.tag }}"
