@@ -20,6 +20,10 @@ on:
         description: 'Platform'
         required: true
         type: string
+      ref:
+        description: 'Branch'
+        required: false
+        type: string
     secrets:
       EXPO_TOKEN:
         required: true
@@ -46,6 +50,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
