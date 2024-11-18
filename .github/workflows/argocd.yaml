@@ -20,6 +20,10 @@ on:
         description: 'Environment'
         required: true
         type: string
+      project:
+        description: 'Project (graph or mps)'
+        required: true
+        type: string
 
     secrets:
       ARGOCD_PAT:
@@ -37,14 +41,21 @@ jobs:
           repository: wer1hub/argocd
           token: ${{ secrets.ARGOCD_PAT }}
 
-      - name: Update image version
+      - name: Update image version for graph
+        if: inputs.project == 'graph'
         run: |
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-private.yaml
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-private-admin.yaml
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-public.yaml
           sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/graph/graph-dbmigrate-job.yaml
 
-      - name: Commit updated image version
+      - name: Update image version for mps
+        if: inputs.project == 'mps'
+        run: |
+          sed -i "s|${{ inputs.aws-ecr-repository-uri }}:.*|${{ inputs.aws-ecr-repository-uri }}:${{ inputs.tag }}|" ${{ inputs.env }}/apps/mps/mps.yaml
+
+      - name: Commit updated image version for graph
+        if: inputs.project == 'graph'
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "support@wer1.ai"
@@ -52,5 +63,14 @@ jobs:
           git add ${{ inputs.env }}/apps/graph/graph-private-admin.yaml
           git add ${{ inputs.env }}/apps/graph/graph-public.yaml
           git add ${{ inputs.env }}/apps/graph/graph-dbmigrate-job.yaml
-          git commit -m "#autocommit: Update image version to ${{ inputs.tag }}"
+          git commit -m "#autocommit: Update graph image version to ${{ inputs.tag }}"
+          git push
+
+      - name: Commit updated image version for mps
+        if: inputs.project == 'mps'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "support@wer1.ai"
+          git add ${{ inputs.env }}/apps/mps/mps.yaml
+          git commit -m "#autocommit: Update mps image version to ${{ inputs.tag }}"
           git push
