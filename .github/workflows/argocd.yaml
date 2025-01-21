@@ -26,7 +26,9 @@ on:
         type: string
 
     secrets:
-      ARGOCD_PAT:
+      CI_BOT_APP_ID:
+        required: true
+      CI_BOT_PRIVATE_KEY_BASE64:
         required: true
 
 jobs:
@@ -35,6 +37,13 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
 
     steps:
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CI_BOT_APP_ID }}
+          private-key: ${{ fromJSON(secrets.CI_BOT_PRIVATE_KEY_BASE64) | base64Decode }}
+
       - name: Checkout image version in argocd
         uses: actions/checkout@master
         with:
