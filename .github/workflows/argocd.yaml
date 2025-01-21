@@ -43,6 +43,8 @@ jobs:
         with:
           app-id: ${{ secrets.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
+          owner: wer1hub
+          repositories: argocd
 
       - name: Checkout image version in argocd
         uses: actions/checkout@master
