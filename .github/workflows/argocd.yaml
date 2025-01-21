@@ -42,7 +42,7 @@ jobs:
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.CI_BOT_APP_ID }}
-          private-key: ${{ secrets.CI_BOT_PRIVATE_KEY_BASE64 | base64Decode }}
+          private-key: ${{ fromBase64(secrets.CI_BOT_PRIVATE_KEY_BASE64) }}
 
       - name: Checkout image version in argocd
         uses: actions/checkout@master
