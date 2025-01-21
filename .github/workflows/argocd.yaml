@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Generate token
-        id: generate_token
+        id: app_token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.CI_BOT_APP_ID }}
@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: wer1hub/argocd
-          token: ${{ secrets.ARGOCD_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Update image version for graph
         if: inputs.project == 'graph'
