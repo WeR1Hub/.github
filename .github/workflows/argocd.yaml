@@ -28,7 +28,7 @@ on:
     secrets:
       CI_BOT_APP_ID:
         required: true
-      CI_BOT_PRIVATE_KEY_BASE64:
+      CI_BOT_PRIVATE_KEY:
         required: true
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.CI_BOT_APP_ID }}
-          private-key: ${{ fromBase64(secrets.CI_BOT_PRIVATE_KEY_BASE64) }}
+          private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
 
       - name: Checkout image version in argocd
         uses: actions/checkout@master
