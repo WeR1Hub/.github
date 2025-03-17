@@ -36,6 +36,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     env:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      NODE_OPTIONS: "--max-old-space-size=8192"
     steps:
       - name: Check environment and set profile variable
         run: |
@@ -95,4 +96,4 @@ jobs:
       - name: OTA
         run: |
           doppler -c ${{ inputs.env }} secrets download --no-file --format docker > .env
-          pnpm exec dotenv -e .env -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
+          pnpm exec dotenv -e .env -- NODE_OPTIONS=$NODE_OPTIONS eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
