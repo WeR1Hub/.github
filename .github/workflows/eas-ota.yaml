@@ -94,5 +94,4 @@ jobs:
 
       - name: OTA
         run: |
-          doppler -c ${{ inputs.env }} secrets download --no-file --format docker > .env
-          pnpm exec dotenv -e .env -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
+          doppler run --mount .env -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
