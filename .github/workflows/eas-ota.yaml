@@ -37,7 +37,6 @@ jobs:
     env:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
-
     steps:
       - name: Check environment and set profile variable
         run: |
@@ -74,7 +73,7 @@ jobs:
         name: Setup pnpm cache
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml', '.npmrc') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
