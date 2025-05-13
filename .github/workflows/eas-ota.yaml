@@ -36,6 +36,8 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     env:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
+
     steps:
       - name: Check environment and set profile variable
         run: |
