@@ -94,4 +94,4 @@ jobs:
 
       - name: OTA
         run: |
-          doppler run --mount .env -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
+          doppler run -c ${{ inputs.env }} -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
