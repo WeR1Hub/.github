@@ -29,6 +29,8 @@ on:
         required: true
       DOPPLER_TOKEN:
         required: true
+      PLAYER_NPM_GIT_TOKEN:
+        required: true
 
 jobs:
   build:
