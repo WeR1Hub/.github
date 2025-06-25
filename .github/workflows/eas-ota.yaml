@@ -79,13 +79,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Configure GitHub Packages auth
-        run: |
-          echo "@wer1hub:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${PLAYER_NPM_GIT_TOKEN}" >> ~/.npmrc
-        env:
-          PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
-
       - name: Install dependencies
         run: |
           pnpm install
