@@ -29,8 +29,6 @@ on:
         required: true
       DOPPLER_TOKEN:
         required: true
-      PLAYER_NPM_GIT_TOKEN:
-        required: true
 
 jobs:
   build:
@@ -78,6 +76,13 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml', '.npmrc') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+
+      - name: Configure GitHub Packages auth
+        run: |
+          echo "@wer1hub:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${PLAYER_NPM_GIT_TOKEN}" >> ~/.npmrc
+        env:
+          PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
 
       - name: Install dependencies
         run: |
