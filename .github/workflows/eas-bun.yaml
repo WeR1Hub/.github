@@ -111,11 +111,17 @@ jobs:
       - name: Push updated secrets to EAS and Doppler
         working-directory: apps/wer1-mobile-player
         run: |
-          doppler run -c ${{ inputs.env }} -- eas env:push --env-file .env
+          echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
+          echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
+          # Push env vars
+          doppler run -c ${{ inputs.env }} -- env $(cat .env | xargs) eas env:push
+
+          # Push EAS secrets
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
           doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value "$NEW_ANDROID_VERSION" --non-interactive --type=string --force
 
+          # Sync Doppler state
           doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION="${{ inputs.tag }}" --no-interactive -p customer-app
           doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION="$NEW_ANDROID_VERSION" --no-interactive -p customer-app
 
