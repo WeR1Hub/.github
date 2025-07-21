@@ -1,0 +1,86 @@
+name: OTA
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: 'Agent selection string.'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      env:
+        description: 'Environment'
+        required: true
+        type: string
+      tag:
+        description: 'Tag'
+        required: true
+        type: string
+      platform:
+        description: 'Platform'
+        required: true
+        type: string
+      ref:
+        description: 'Branch'
+        required: false
+        type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
+      DOPPLER_TOKEN:
+        required: true
+      PLAYER_NPM_GIT_TOKEN:
+        required: true
+
+jobs:
+  build:
+    name: EAS OTA
+    runs-on: ${{ inputs.runs-on }}
+    env:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
+    steps:
+      - name: Set EAS profile from env
+        run: |
+          if [ "${{ inputs.env }}" = "dev" ]; then
+            echo "PROFILE=staging" >> $GITHUB_ENV
+          elif [ "${{ inputs.env }}" = "dev_debug" ]; then
+            echo "PROFILE=debug" >> $GITHUB_ENV
+          else
+            echo "PROFILE=production" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Configure GitHub Packages auth for Bun
+        run: |
+          mkdir -p ~/.bun
+          echo '[install.scopes]' >> ~/.bunfig.toml
+          echo '"@wer1hub" = { token = "${{ secrets.PLAYER_NPM_GIT_TOKEN }}", url = "https://npm.pkg.github.com" }' >> ~/.bunfig.toml
+
+      - name: Install dependencies
+        run: |
+          bun install
+          bun add --global eas-cli dotenv-cli
+
+      - name: Setup EAS CLI Auth
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: bun
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
+      - name: OTA update via EAS
+        run: |
+          doppler run -c ${{ inputs.env }} -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto

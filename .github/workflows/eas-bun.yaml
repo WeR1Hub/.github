@@ -1,0 +1,120 @@
+name: EAS Build
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: 'Agent selection string.'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      env:
+        description: 'Environment'
+        required: true
+        type: string
+      tag:
+        description: 'Tag'
+        required: true
+        type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
+      DOPPLER_TOKEN:
+        required: true
+      GOOGLE_PLAY_SA_JSON:
+        required: true
+
+jobs:
+  build:
+    name: EAS Build
+    runs-on: ${{ inputs.runs-on }}
+    env:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+    steps:
+      - name: Set EAS profile
+        run: |
+          if [ "${{ inputs.env }}" = "dev" ]; then
+            echo "PROFILE=staging" >> $GITHUB_ENV
+          elif [ "${{ inputs.env }}" = "dev_debug" ]; then
+            echo "PROFILE=debug" >> $GITHUB_ENV
+          else
+            echo "PROFILE=production" >> $GITHUB_ENV
+          fi
+
+      - name: Show profile/tag
+        run: |
+          echo "Profile: $PROFILE"
+          echo "Tag: ${{ inputs.tag }}"
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup GitHub auth for Bun
+        run: |
+          mkdir -p ~/.bun
+          echo '[install.scopes]' >> ~/.bunfig.toml
+          echo '"@wer1hub" = { token = "${{ secrets.PLAYER_NPM_GIT_TOKEN }}", url = "https://npm.pkg.github.com" }' >> ~/.bunfig.toml
+
+      - name: Install dependencies
+        run: |
+          bun install
+          bun add --global eas-cli dotenv-cli
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: bun
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
+      - name: Configure versioning from Doppler
+        run: |
+          PREVIOUS_RUNTIME_VERSION=$(doppler secrets -c ${{ inputs.env }} get RUNTIME_VERSION --plain -p customer-app)
+          echo "PREVIOUS_RUNTIME_VERSION=$PREVIOUS_RUNTIME_VERSION" >> $GITHUB_ENV
+
+          PREVIOUS_ANDROID_VERSION=$(doppler secrets -c ${{ inputs.env }} get ANDROID_VERSION --plain -p customer-app)
+          echo "PREVIOUS_ANDROID_VERSION=$PREVIOUS_ANDROID_VERSION" >> $GITHUB_ENV
+
+          NEW_ANDROID_VERSION=$(echo "$PREVIOUS_ANDROID_VERSION + 1" | bc)
+          echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
+
+      - name: Push updated secrets to Doppler/EAS
+        run: |
+          doppler run -c ${{ inputs.env }} --mount .env -- doppler run -c ${{ inputs.env }} -- eas secret:push --scope project --non-interactive --env-file .env --force
+
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
+
+          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
+
+      - name: Decode Google Play credentials
+        env:
+          GOOGLE_PLAY_SA_JSON: ${{ secrets.GOOGLE_PLAY_SA_JSON }}
+        run: echo "$GOOGLE_PLAY_SA_JSON" | base64 -di > ./southern-coda-411410-0c65b9cc39a1.json
+
+      - name: EAS Build
+        run: |
+          doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive --auto-submit --clear-cache
+
+      - name: Generate Release Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v4.2.0
+        with:
+          fromTag: ${{ env.PREVIOUS_RUNTIME_VERSION }}-dev
+          toTag: ${{ inputs.tag }}-dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: mikepenz/action-gh-release@v0.4.1
+        with:
+          body: ${{ steps.github_release.outputs.changelog }}
