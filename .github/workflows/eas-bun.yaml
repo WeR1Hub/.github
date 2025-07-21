@@ -100,10 +100,10 @@ jobs:
           NEW_ANDROID_VERSION=$(echo "$PREVIOUS_ANDROID_VERSION + 1" | bc)
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-      - name: Push updated secrets to Doppler/EAS
+      - name: Push updated secrets to EAS
         working-directory: apps/wer1-mobile-player
         run: |
-          doppler run -c ${{ inputs.env }} --mount .env -- eas secret:push --non-interactive --env-file .env --force
+          doppler run -c ${{ inputs.env }} -- eas env:push --env-file .env
 
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --non-interactive --type=string --force
           doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --non-interactive --type=string --force
