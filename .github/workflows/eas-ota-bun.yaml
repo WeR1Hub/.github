@@ -40,6 +40,11 @@ jobs:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+
       - name: Set EAS profile from env
         run: |
           if [ "${{ inputs.env }}" = "dev" ]; then
@@ -50,13 +55,7 @@ jobs:
             echo "PROFILE=production" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ inputs.ref }}
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
@@ -67,6 +66,7 @@ jobs:
           echo '"@wer1hub" = { token = "${{ secrets.PLAYER_NPM_GIT_TOKEN }}", url = "https://npm.pkg.github.com" }' >> ~/.bunfig.toml
 
       - name: Install dependencies
+        working-directory: apps/wer1-mobile-player
         run: |
           bun install
           bun add --global eas-cli dotenv-cli
@@ -82,5 +82,6 @@ jobs:
         uses: dopplerhq/cli-action@v3
 
       - name: OTA update via EAS
+        working-directory: apps/wer1-mobile-player
         run: |
           doppler run -c ${{ inputs.env }} -- eas update --platform ${{ inputs.platform }} --channel $PROFILE --clear-cache --non-interactive --auto
