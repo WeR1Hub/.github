@@ -126,7 +126,7 @@ jobs:
           echo "Resolved EAS_ENV: $EAS_ENV"
 
           # Push .env vars to EAS (corrected syntax)
-          eas env:push --env-file=.env --environment=$EAS_ENV
+          eas env:push --env-file=.env --environment=development
 
           # Push EAS secrets
           doppler run -c dev -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
