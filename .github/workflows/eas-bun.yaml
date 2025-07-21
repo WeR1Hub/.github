@@ -103,7 +103,7 @@ jobs:
       - name: Push updated secrets to Doppler/EAS
         working-directory: apps/wer1-mobile-player
         run: |
-          doppler run -c ${{ inputs.env }} --mount .env -- doppler run -c ${{ inputs.env }} -- eas secret:push --scope project --non-interactive --env-file .env --force
+          doppler run -c ${{ inputs.env }} --mount .env -- eas env:push --env-file .env --force
 
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
           doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
