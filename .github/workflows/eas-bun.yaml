@@ -21,6 +21,8 @@ on:
         required: true
       DOPPLER_TOKEN:
         required: true
+      PLAYER_NPM_GIT_TOKEN:
+        required: true
       GOOGLE_PLAY_SA_JSON:
         required: true
 
@@ -30,7 +32,12 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     env:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      PLAYER_NPM_GIT_TOKEN: ${{ secrets.PLAYER_NPM_GIT_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Set EAS profile
         run: |
           if [ "${{ inputs.env }}" = "dev" ]; then
@@ -46,12 +53,7 @@ jobs:
           echo "Profile: $PROFILE"
           echo "Tag: ${{ inputs.tag }}"
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
@@ -62,6 +64,7 @@ jobs:
           echo '"@wer1hub" = { token = "${{ secrets.PLAYER_NPM_GIT_TOKEN }}", url = "https://npm.pkg.github.com" }' >> ~/.bunfig.toml
 
       - name: Install dependencies
+        working-directory: apps/wer1-mobile-player
         run: |
           bun install
           bun add --global eas-cli dotenv-cli
@@ -88,6 +91,7 @@ jobs:
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
       - name: Push updated secrets to Doppler/EAS
+        working-directory: apps/wer1-mobile-player
         run: |
           doppler run -c ${{ inputs.env }} --mount .env -- doppler run -c ${{ inputs.env }} -- eas secret:push --scope project --non-interactive --env-file .env --force
 
@@ -103,6 +107,7 @@ jobs:
         run: echo "$GOOGLE_PLAY_SA_JSON" | base64 -di > ./southern-coda-411410-0c65b9cc39a1.json
 
       - name: EAS Build
+        working-directory: apps/wer1-mobile-player
         run: |
           doppler run -c ${{ inputs.env }} -- eas build --profile $PROFILE --platform all --no-wait --non-interactive --auto-submit --clear-cache
 
