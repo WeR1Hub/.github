@@ -103,6 +103,8 @@ jobs:
       - name: Create .env from Doppler
         working-directory: apps/wer1-mobile-player
         run: |
+          echo "Cleaning up old .env if exists..."
+          rm -f .env
           echo "Creating .env from Doppler..."
           doppler run -c ${{ inputs.env }} --mount .env -- printenv > .env
           echo "✅ .env generated:"
