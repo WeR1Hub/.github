@@ -125,8 +125,8 @@ jobs:
 
           echo "Resolved EAS_ENV: $EAS_ENV"
 
-          # Push env vars to EAS
-          bunx dotenv -e .env -- eas env:push --environment $EAS_ENV
+          # Push env vars to EAS (use actual .env file explicitly)
+          eas env:push --environment $EAS_ENV --env-file .env
 
           # Push EAS secrets
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
