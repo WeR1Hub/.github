@@ -100,16 +100,24 @@ jobs:
           NEW_ANDROID_VERSION=$(echo "$PREVIOUS_ANDROID_VERSION + 1" | bc)
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-      - name: Push updated secrets to EAS
+      - name: Create .env from Doppler
+        working-directory: apps/wer1-mobile-player
+        run: |
+          echo "Creating .env from Doppler..."
+          doppler run -c ${{ inputs.env }} --mount .env -- printenv > .env
+          echo "✅ .env generated:"
+          cat .env
+
+      - name: Push updated secrets to EAS and Doppler
         working-directory: apps/wer1-mobile-player
         run: |
           doppler run -c ${{ inputs.env }} -- eas env:push --env-file .env
 
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --non-interactive --type=string --force
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --non-interactive --type=string --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value "$NEW_ANDROID_VERSION" --non-interactive --type=string --force
 
-          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
-          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION="${{ inputs.tag }}" --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION="$NEW_ANDROID_VERSION" --no-interactive -p customer-app
 
       - name: Decode Google Play credentials
         env:
