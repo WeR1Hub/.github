@@ -114,7 +114,7 @@ jobs:
           echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-          # Map profile to actual EAS env name
+          # Map profile to EAS env
           if [ "$PROFILE" = "staging" ]; then
             EAS_ENV=development
           elif [ "$PROFILE" = "debug" ]; then
@@ -125,16 +125,16 @@ jobs:
 
           echo "Resolved EAS_ENV: $EAS_ENV"
 
-          # Push env vars to EAS (use actual .env file explicitly)
-          eas env:push --environment $EAS_ENV --env-file .env
+          # Push .env vars to EAS (fix order!)
+          eas env:push --env-file .env --environment $EAS_ENV
 
           # Push EAS secrets
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value "$NEW_ANDROID_VERSION" --non-interactive --type=string --force
+          doppler run -c dev -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
+          doppler run -c dev -- eas secret:create --name ANDROID_VERSION --value "$NEW_ANDROID_VERSION" --non-interactive --type=string --force
 
           # Sync back to Doppler
-          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION="${{ inputs.tag }}" --no-interactive -p customer-app
-          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION="$NEW_ANDROID_VERSION" --no-interactive -p customer-app
+          doppler secrets -c dev set RUNTIME_VERSION="${{ inputs.tag }}" --no-interactive -p customer-app
+          doppler secrets -c dev set ANDROID_VERSION="$NEW_ANDROID_VERSION" --no-interactive -p customer-app
 
       - name: Decode Google Play credentials
         env:
