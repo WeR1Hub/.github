@@ -114,8 +114,8 @@ jobs:
           echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-          # Load env from .env and push
-          bunx dotenv -e .env -- eas env:push
+          # Load env from .env and push to EAS
+          bunx dotenv -e .env -- eas env:push --environment $PROFILE
 
           # Push EAS secrets
           doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
