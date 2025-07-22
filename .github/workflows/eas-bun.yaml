@@ -100,28 +100,28 @@ jobs:
           NEW_ANDROID_VERSION=$(echo "$PREVIOUS_ANDROID_VERSION + 1" | bc)
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-      - name: Push updated secrets to EAS and Doppler
-        working-directory: apps/wer1-mobile-player
-        run: |
-          echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
-          echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
+      # - name: Push updated secrets to EAS and Doppler
+      #   working-directory: apps/wer1-mobile-player
+      #   run: |
+      #     echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
+      #     echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-          # Map profile to EAS env
-          if [ "$PROFILE" = "staging" ]; then
-            EAS_ENV=development
-          elif [ "$PROFILE" = "debug" ]; then
-            EAS_ENV=preview
-          else
-            EAS_ENV=production
-          fi
+      #     # Map profile to EAS env
+      #     if [ "$PROFILE" = "staging" ]; then
+      #       EAS_ENV=development
+      #     elif [ "$PROFILE" = "debug" ]; then
+      #       EAS_ENV=preview
+      #     else
+      #       EAS_ENV=production
+      #     fi
 
-          echo "Resolved EAS_ENV: $EAS_ENV"
+      #     echo "Resolved EAS_ENV: $EAS_ENV"
 
-          doppler run -c ${{ inputs.env }} --mount .env -- doppler run -c ${{ inputs.env }} -- eas secret:push --scope project --non-interactive --env-file .env --force
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
-          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
-          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
-          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
+      #     doppler run -c ${{ inputs.env }} --mount .env -- doppler run -c ${{ inputs.env }} -- eas secret:push --scope project --non-interactive --env-file .env --force
+      #     doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
+      #     doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
+      #     doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
+      #     doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: Decode Google Play credentials
         env:
