@@ -100,14 +100,6 @@ jobs:
           NEW_ANDROID_VERSION=$(echo "$PREVIOUS_ANDROID_VERSION + 1" | bc)
           echo "NEW_ANDROID_VERSION=$NEW_ANDROID_VERSION" >> $GITHUB_ENV
 
-      - name: Create .env from Doppler
-        working-directory: apps/wer1-mobile-player
-        run: |
-          echo "Creating .env from Doppler..."
-          doppler run -c ${{ inputs.env }} -- printenv > .env 
-          echo "✅ .env generated:"
-          cat .env
-
       - name: Push updated secrets to EAS and Doppler
         working-directory: apps/wer1-mobile-player
         run: |
