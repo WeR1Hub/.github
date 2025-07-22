@@ -125,16 +125,11 @@ jobs:
 
           echo "Resolved EAS_ENV: $EAS_ENV"
 
-          # Push .env vars to EAS (corrected syntax)
-          # eas env:push --env-file=.env --environment=development
-
-          # Push EAS secrets
-          doppler run -c dev -- eas secret:create --name RUNTIME_VERSION --value "${{ inputs.tag }}" --non-interactive --type=string --force
-          doppler run -c dev -- eas secret:create --name ANDROID_VERSION --value "$NEW_ANDROID_VERSION" --non-interactive --type=string --force
-
-          # Sync back to Doppler
-          doppler secrets -c dev set RUNTIME_VERSION="${{ inputs.tag }}" --no-interactive -p customer-app
-          doppler secrets -c dev set ANDROID_VERSION="$NEW_ANDROID_VERSION" --no-interactive -p customer-app
+          doppler run -c ${{ inputs.env }} --mount .env -- doppler run -c ${{ inputs.env }} -- eas secret:push --scope project --non-interactive --env-file .env --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name RUNTIME_VERSION --value ${{ inputs.tag }} --scope project --non-interactive --type=string --force
+          doppler run -c ${{ inputs.env }} -- eas secret:create --name ANDROID_VERSION --value $NEW_ANDROID_VERSION --scope project --non-interactive --type=string --force
+          doppler secrets -c ${{ inputs.env }} set RUNTIME_VERSION=${{ inputs.tag }} --no-interactive -p customer-app
+          doppler secrets -c ${{ inputs.env }} set ANDROID_VERSION=$NEW_ANDROID_VERSION --no-interactive -p customer-app
 
       - name: Decode Google Play credentials
         env:
